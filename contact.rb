@@ -18,10 +18,11 @@ class Contact
   	phones = ""
   	@phone_numbers.each do |phone_entry|
   		phone_entry.each do |label, number|
-  			phones += "#{label}: #{number}\n"
+  			capitalized_label = label[0].upcase + label[1..-1]
+  			phones += "#{capitalized_label}: #{number}\n"
   		end
   	end 
-  	"Name: #{@first_name} #{@last_name}\nEmail: #{@email}\n#{phones}"
+  	"\nName: #{@first_name} #{@last_name}\nEmail: #{@email}\n#{phones}\n"
   end
   
   def to_s

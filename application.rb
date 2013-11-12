@@ -3,7 +3,7 @@ class Application
   def initialize
     # Start with an empty array of contacts.
     # TODO: Perhaps stub (seed) some contacts so we don't have to create some every time we restart the app
-    @contacts = []
+    @contacts = ContactDatabase.new.read
   end
  
   def run
@@ -23,6 +23,7 @@ class Application
     case command
     when 'quit'
       puts "Goodbye!"
+      ContactDatabase.new.write(@contacts)
     when 'new'
       create_new_contact
     when 'list'
@@ -72,8 +73,8 @@ class Application
     index = index.to_i
     return puts "Not found" if index >= @contacts.size || index == -1
     contact = @contacts[index]
-    puts contact.display
     loop do
+      puts contact.display
       show_edit_option
       input = gets.chomp
       edit_contact(input, index)
