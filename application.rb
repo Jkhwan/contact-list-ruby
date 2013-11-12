@@ -44,6 +44,18 @@ class Application
     gets.chomp
   end
 
+  def get_phone
+    puts 'Enter your phone number: '
+    print '> '
+    number = gets.chomp
+    puts 'Enter a label: '
+    print '> '
+    label = gets.chomp
+    phone_entry = {}
+    phone_entry[label] = number
+    return phone_entry
+  end
+
   def create_new_contact
     email = get_email
     return puts "This contact already exists in the system" if @contacts.detect { |contact| contact.email == email }
@@ -75,10 +87,13 @@ class Application
       @contacts[index].edit_name(get_name)
     when 'edit email'
       @contacts[index].edit_email(get_email)
+    when 'add phone'
+      @contacts[index].add_phone(get_phone)
     end
   end
   
   def show_edit_option
+    puts ' add phone  - Add a new phone number to current contact'
     puts ' edit name  - Edit name of current contact'
     puts ' edit email - Edit email of current contact'
     puts ' back       - Back to main menu'
