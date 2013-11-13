@@ -22,7 +22,7 @@ class Contact
   			phones += "#{capitalized_label}: #{number}\n"
   		end
   	end 
-  	"\nName: #{@first_name} #{@last_name}\nEmail: #{@email}\n#{phones}\n"
+  	"Name: #{@first_name} #{@last_name}\nEmail: #{@email}\n#{phones}".red
   end
   
   def to_s
@@ -40,7 +40,9 @@ class Contact
     @email = email
   end
 
-  def add_phone(phone_entry)
+  def add_phone(label, number)
+    phone_entry = {}
+    phone_entry[label] = number
   	@phone_numbers.push(phone_entry)
   end
 
