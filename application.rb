@@ -149,7 +149,7 @@ class Application
     when 'add phone'
       phone_data = get_phone
       # contact = Contact.find(id).add_phone(phone_data[0], phone_data[1])
-      Contact.find(id).phone_numbers.create({label: phone_data[0], number: phone_data[1]})
+      Contact.find(id).phone_numbers.create(label: phone_data[0], number: phone_data[1])
     end
   end
   
