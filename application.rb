@@ -1,11 +1,5 @@
 class Application
  
-  def initialize
-    # Start with an empty array of contacts.
-    # TODO: Perhaps stub (seed) some contacts so we don't have to create some every time we restart the app
-    @contacts = ContactDatabase.new.read
-  end
- 
   def run
     show_intro
     loop do
@@ -16,18 +10,23 @@ class Application
     end
   end
 
+  private
+
   def action(input)
     input = input.split(' ')
     command = input[0]
     argument = input[1] || -1
-    case command
+    case command.downcase
     when 'quit'
-      write_to_file
       puts "Goodbye!"
     when 'new'
       create_new_contact
+    when 'delete'
+      delete_contact(argument)
     when 'list'
       list_contacts
+    when 'list_most_important'
+      list_most_important_contacts
     when 'show'
       show_contact(argument)
     when 'find'
@@ -37,50 +36,77 @@ class Application
     end
   end
 
-  def write_to_file
-    ContactDatabase.new.write(@contacts)
-  end
-
   def get_name
-    puts 'Enter your full name: '.blue
+    puts 'Enter your full name: '.light_blue
     print '> '.red
-    gets.chomp
+    clean_input(gets)
   end
 
   def get_email
-    puts 'Enter your email: '.blue
+    puts 'Enter your email: '.light_blue
     print '> '.red
-    gets.chomp
+    clean_input(gets)
+  end
+
+  def get_importance
+    puts 'Enter an importance value (1 to 5): '.light_blue
+    print '> '.red
+    clean_input(gets)
   end
 
   def get_phone
-    puts 'Enter your phone number: '.blue
+    puts 'Enter your phone number: '.light_blue
     print '> '
-    number = gets.chomp
-    puts 'Enter a label: '.blue
+    number = clean_input(gets)
+    puts 'Enter a label: '.light_blue
     print '> '.red
-    label = gets.chomp
+    label = clean_input(gets)
     data = []
     data.push(label).push(number)
   end
 
+  def clean_input(input)
+    input.chomp.rstrip
+  end
+
+  def display_error(errors)
+    errors.full_messages.each { |message| puts message.red }
+  end
+
   def create_new_contact
-    email = get_email
-    return puts "This contact already exists in the system".red if @contacts.detect { |contact| contact.email == email }
-    full_name = get_name
-    contact = Contact.new(full_name, email)
-    @contacts.push(contact)
+    contact = Contact.new
+    while true
+      contact.attributes = {email: get_email}
+      break if contact.valid?
+      display_error(contact.errors)
+    end
+    full_name = get_name.split(' ')
+    contact.attributes = {first_name: full_name.first, last_name: full_name.last}
+    while true
+      contact.attributes = {importance: get_importance}
+      break if contact.valid?
+      display_error(contact.errors)
+    end
+    contact.save
+    puts "Contact created!".red
   end
 
   def list_contacts
-    @contacts.each.with_index { |contact, index| puts "#{index}: #{contact}".red }
+    Contact.all.each { |contact| puts "#{contact.id}: #{contact}".red }
+  end
+
+  def list_most_important_contacts
+    Contact.where.not(importance: nil).order(importance: :desc).each { |contact| puts "#{contact.id}: #{contact}".red }
   end
 
   def show_contact(index)
     index = index.to_i
-    return puts "Not found" if index >= @contacts.size || index == -1
-    contact = @contacts[index]
     loop do
+      begin
+        contact = Contact.find(index)
+      rescue
+        return puts "Not found".red
+      end
       puts contact.display
       show_edit_option
       input = gets.chomp
@@ -90,22 +116,40 @@ class Application
   end
 
   def find_contact(term)
-    @contacts.each do |contact|
-      if contact.first_name.include?(term) || contact.last_name.include?(term) || contact.email.include?(term)
-        puts contact.display
-      end
+    term = term.downcase
+    contacts = Contact.all.select {|contact| contact.first_name.downcase.include?(term) || 
+                                             contact.last_name.downcase.include?(term) || 
+                                             contact.email.downcase.include?(term)}
+    if (contacts.empty?)
+      puts "Not found!".red
+    else
+      contacts.each { |contact| puts "#{contact.display}\n\n"}
     end
   end
 
-  def edit_contact(option, index)
+  def delete_contact(id)
+    contact = Contact.find(id)
+    contact.destroy
+    puts "Contact deleted!".red
+  end
+
+  def edit_contact(option, id)
     case option
     when 'edit name'
-      @contacts[index].edit_name(get_name)
+      contact = Contact.find(id)
+      contact.full_name = get_name
+      contact.save
     when 'edit email'
-      @contacts[index].edit_email(get_email)
+      contact = Contact.find(id)
+      while true
+        contact.email = get_email
+        break if contact.save
+        display_error(contact.errors)
+      end
     when 'add phone'
       phone_data = get_phone
-      @contacts[index].add_phone(phone_data[0], phone_data[1])
+      # contact = Contact.find(id).add_phone(phone_data[0], phone_data[1])
+      Contact.find(id).phone_numbers.create({label: phone_data[0], number: phone_data[1]})
     end
   end
   
@@ -123,10 +167,13 @@ class Application
 
   # Prints the main menu only
   def show_main_menu
-    puts " new         - Create a new contact".yellow
-    puts " list        - List all contacts".yellow
-    puts " find :term  - Search the contact details".yellow
-    puts " show :id    - Display contact details".yellow
+    puts " new                  - Create a new contact".yellow
+    puts " delete :id           - Delete a contact".yellow
+    puts " list                 - List all contacts".yellow
+    puts " list_most_important  - List all contacts ordered by importance".yellow
+    puts " find :term           - Search the contact details".yellow
+    puts " show :id             - Display contact details".yellow
+    puts " quit                 - Exit the program".yellow
     print "> ".red
   end
  
