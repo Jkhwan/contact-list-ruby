@@ -32,7 +32,7 @@ class Application
     when 'find'
       find_contact(argument)
     else
-      puts "Invalid input"
+      puts "Invalid input".red
     end
   end
 
@@ -80,8 +80,12 @@ class Application
       break if contact.valid?
       display_error(contact.errors)
     end
+
     full_name = get_name.split(' ')
     contact.attributes = {first_name: full_name.first, last_name: full_name.last}
+
+    # contact.attributes = {full_name: get_name}
+
     while true
       contact.attributes = {importance: get_importance}
       break if contact.valid?

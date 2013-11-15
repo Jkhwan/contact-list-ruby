@@ -5,7 +5,16 @@ class Contact < ActiveRecord::Base
   validates :email, uniqueness: { case_sensitive: false }, presence: true, format: { with: /\A.+@.+\..+\Z/, message: "is not in a valid format" }
   validates :importance, allow_nil: true, numericality: { only_integer: true, greater_than_or_equal_to: 1,
                                          less_than_or_equal_to: 5,
-                                         message: "must be between 1 to 5" } 
+                                         message: "must be between 1 to 5" }
+
+  # attr_accessor :full_name
+
+  # before_create do |contact|
+  #   puts contact.full_name
+  #   full_name = contact.full_name.split(' ')
+  #   contact.first_name = full_name.first
+  #   contact.last_name = full_name.last
+  # end
 
   def display
   	phones = ""

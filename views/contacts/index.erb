@@ -1,0 +1,9 @@
+<h1>Welcome to my contact management system!</h1>
+<ul>
+  <% @contacts.each do |contact| %>
+    <li>
+      <h2><a href="/contacts/<%= contact.id %>"><%= contact.first_name %> <%= contact.last_name %></a>
+      </h2>
+    </li>
+  <% end %>
+</ul>

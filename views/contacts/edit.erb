@@ -1,0 +1,21 @@
+<h1>Edit Contact</h1>
+
+<h2 style="color: red"><%= @contact.errors.full_messages.first %></h2>
+<form action="/contacts/<%= @contact.id %>" method="post">
+  <input type="hidden" name="_method" value="put" />
+
+  <label for="contact_first_name">First name:</label><br />
+  <input id="contact_first_name" name="contact[first_name]" type="text" value="<%= @contact.first_name %>" />
+  <br />
+  <label for="contact_last_name">Last name:</label><br />
+  <input id="contact_last_name" name="contact[last_name]" type="text" value="<%= @contact.last_name %>" />
+  <br />
+  <label for="contact_email">Email:</label><br />
+  <input id="contact_email" name="contact[email]" type="text" value="<%= @contact.email %>" />
+  <br />
+  <label for="contact_importance">Importance:</label><br />
+  <input id="contact_importance" name="contact[importance]" type="text" value="<%= @contact.importance %>" />
+  <br />
+ 
+  <input type="submit" value="Edit Contact" />
+</form>
